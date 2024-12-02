@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"color": "#FF6B6B", "id": "A", "label": "A\n(D: 3.0)", "shape": "dot", "title": "A\n(D: 3.0)"}, {"color": "#2ECC71", "id": "B", "label": "B\n(D: 0)", "shape": "dot", "title": "B\n(D: 0)"}, {"color": "#2ECC71", "id": "C", "label": "C\n(D: 2.0)", "shape": "dot", "title": "C\n(D: 2.0)"}, {"color": "#2ECC71", "id": "D", "label": "D\n(D: 1.0)", "shape": "dot", "title": "D\n(D: 1.0)"}, {"color": "#97C2FC", "id": "E", "label": "E\n(D: 4.0)", "shape": "dot", "title": "E\n(D: 4.0)"}, {"color": "#97C2FC", "id": "F", "label": "F\n(D: 3.0)", "shape": "dot", "title": "F\n(D: 3.0)"}]);
-                  edges = new vis.DataSet([{"from": "A", "label": "3.0", "to": "B"}, {"from": "A", "label": "2.0", "to": "C"}, {"from": "B", "label": "1.0", "to": "D"}, {"from": "C", "label": "1.0", "to": "D"}, {"from": "C", "label": "2.0", "to": "E"}, {"from": "D", "label": "2.0", "to": "F"}, {"from": "E", "label": "4.0", "to": "F"}]);
+                  nodes = new vis.DataSet([{"color": "#2ECC71", "id": "1", "label": "1\n(D: 0)", "physics": false, "shape": "dot", "title": "1\n(D: 0)", "x": 60.855923105122876, "y": -456.34380703195137}, {"color": "#2ECC71", "id": "2", "label": "2\n(D: 2.0)", "physics": false, "shape": "dot", "title": "2\n(D: 2.0)", "x": 110.45008754508, "y": -85.4507852091651}, {"color": "#2ECC71", "id": "3", "label": "3\n(D: 3.0)", "physics": false, "shape": "dot", "title": "3\n(D: 3.0)", "x": -117.65213807050068, "y": -281.49876548726627}, {"color": "#2ECC71", "id": "4", "label": "4\n(D: 4.0)", "physics": false, "shape": "dot", "title": "4\n(D: 4.0)", "x": 63.22117975453234, "y": 298.5698153719324}, {"color": "#2ECC71", "id": "5", "label": "5\n(D: 6.0)", "physics": false, "shape": "dot", "title": "5\n(D: 6.0)", "x": -70.69763505310108, "y": 24.723542356450157}, {"color": "#2ECC71", "id": "6", "label": "6\n(D: 7.0)", "physics": false, "shape": "dot", "title": "6\n(D: 7.0)", "x": -46.17741728113366, "y": 500.0}]);
+                  edges = new vis.DataSet([{"from": "1", "label": "2.0", "to": "2"}, {"from": "1", "label": "4.0", "to": "3"}, {"from": "2", "label": "1.0", "to": "3"}, {"from": "2", "label": "2.0", "to": "4"}, {"from": "2", "label": "6.0", "to": "5"}, {"from": "3", "label": "4.0", "to": "5"}, {"from": "4", "label": "2.0", "to": "5"}, {"from": "4", "label": "5.0", "to": "6"}, {"from": "5", "label": "1.0", "to": "6"}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -119,7 +119,7 @@
         "hideNodesOnDrag": false
     },
     "physics": {
-        "enabled": true,
+        "enabled": false,
         "stabilization": {
             "enabled": true,
             "fit": true,

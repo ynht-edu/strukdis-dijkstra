@@ -9,16 +9,15 @@ class DijkstraVisualizer:
         self.node_colors = {}
         self.steps = []
         self.current_step = 0
+        self.node_positions = {}  # Store node positions
 
     def add_nodes_from_list(self, nodes):
-        """Add multiple nodes from a list"""
         for node in nodes:
             self.G.add_node(node)
             self.node_colors[node] = '#97C2FC'
         return True
 
     def add_edges_from_list(self, edges):
-        """Add multiple edges from a list of tuples (from_node, to_node, weight)"""
         valid_edges = []
         for from_node, to_node, weight in edges:
             if from_node in self.G.nodes and to_node in self.G.nodes:
@@ -26,7 +25,23 @@ class DijkstraVisualizer:
                 valid_edges.append((from_node, to_node, weight))
         return valid_edges
 
+    def initialize_positions(self):
+        # Only initialize positions if they haven't been set yet
+        if not self.node_positions:
+            # Use networkx to generate initial positions
+            pos = nx.spring_layout(self.G)
+            
+            # Convert networkx positions to the format we need
+            for node, position in pos.items():
+                self.node_positions[node] = {
+                    'x': float(position[0]) * 500,  # Scale the positions
+                    'y': float(position[1]) * 500
+                }
+
     def dijkstra(self, start_node):
+        # Initialize positions before running Dijkstra
+        self.initialize_positions()
+        
         # Reset colors
         for node in self.G.nodes:
             self.node_colors[node] = '#97C2FC'
@@ -36,14 +51,14 @@ class DijkstraVisualizer:
         distances = {node: float('inf') for node in self.G.nodes}
         distances[start_node] = 0
         unvisited = set(self.G.nodes)
-        previous = {node: None for node in self.G.nodes}  # Track previous nodes
+        previous = {node: None for node in self.G.nodes}
 
         while unvisited:
             current_state = {
                 'visited': set(self.G.nodes) - unvisited,
                 'current_node': None,
                 'distances': distances.copy(),
-                'previous': previous.copy()  # Add previous nodes to state
+                'previous': previous.copy()
             }
 
             current_node = min(unvisited, key=lambda node: distances[node])
@@ -57,17 +72,16 @@ class DijkstraVisualizer:
                     tentative_distance = distances[current_node] + self.G[current_node][neighbor]['weight']
                     if tentative_distance < distances[neighbor]:
                         distances[neighbor] = tentative_distance
-                        previous[neighbor] = current_node  # Update previous node
+                        previous[neighbor] = current_node
 
         self.steps.append({
             'visited': set(self.G.nodes),
             'current_node': None,
             'distances': distances,
-            'previous': previous  # Include in final state
+            'previous': previous
         })
 
     def get_path_to_node(self, node, previous):
-        """Reconstruct path to a node from previous nodes dict"""
         path = []
         current = node
         while current is not None:
@@ -77,6 +91,7 @@ class DijkstraVisualizer:
 
     def visualize_step(self, step_index):
         net = Network(height="500px", width="100%", bgcolor="#ffffff")
+        net.toggle_physics(False)  # Disable physics simulation
         
         step = self.steps[step_index]
         for node in self.G.nodes:
@@ -87,7 +102,17 @@ class DijkstraVisualizer:
             previous = step['previous'][node]
             label = f"{node}\n(D: {distance if distance != float('inf') else '∞'})"
             
-            net.add_node(node, label=label, color=color, title=label)
+            # Use stored position for the node
+            position = self.node_positions.get(node, {})
+            net.add_node(
+                node, 
+                label=label, 
+                color=color, 
+                title=label,
+                x=position.get('x', 0),
+                y=position.get('y', 0),
+                physics=False  # Disable physics for individual nodes
+            )
 
         for (u, v, d) in self.G.edges(data=True):
             net.add_edge(u, v, label=str(d['weight']))
@@ -97,7 +122,6 @@ class DijkstraVisualizer:
             return f.read()
 
 def parse_nodes(node_input):
-    """Parse node input string into a list"""
     try:
         nodes = [node.strip() for node in node_input.split(',')]
         return [node for node in nodes if node]
@@ -105,7 +129,6 @@ def parse_nodes(node_input):
         return None
 
 def parse_edges(edge_input):
-    """Parse edge input string into a list of tuples"""
     try:
         edges = ast.literal_eval(edge_input)
         if isinstance(edges, list):
@@ -157,6 +180,8 @@ def main():
                 valid_edges = viz.add_edges_from_list(edges)
                 if valid_edges:
                     st.success(f"Added edges: {valid_edges}")
+                    # Initialize positions after adding edges
+                    viz.initialize_positions()
                 else:
                     st.warning("No valid edges added. Make sure nodes exist.")
             else:
@@ -172,10 +197,20 @@ def main():
             st.write("Edges:", [(u, v, d['weight']) for (u, v, d) in viz.G.edges(data=True)])
             
             net = Network(height="500px", width="100%", bgcolor="#ffffff")
+            net.toggle_physics(False)  # Disable physics simulation
+            
+            # Use stored positions for visualization
             for node in viz.G.nodes:
-                net.add_node(node)
+                position = viz.node_positions.get(node, {})
+                net.add_node(
+                    node,
+                    x=position.get('x', 0),
+                    y=position.get('y', 0),
+                    physics=False
+                )
             for (u, v, d) in viz.G.edges(data=True):
                 net.add_edge(u, v, label=str(d['weight']))
+            
             net.save_graph("temp_graph.html")
             with open("temp_graph.html", 'r') as f:
                 st.components.v1.html(f.read(), height=500)
